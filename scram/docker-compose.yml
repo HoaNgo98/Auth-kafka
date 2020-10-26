@@ -1,0 +1,27 @@
+version: '3'
+services:
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    restart: on-failure
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+    ports:
+      - "2181:2181"
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+      - KAFKA_HEAP_OPTS=-Xmx4G -Xms4G
+      - JMX_PORT=9997
+      - KAFKA_JMX_OPT=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=9997
+    depends_on:
+      - zookeeper
+    restart: on-failure
+    ports:
+      - "9093:9093"
+      - "9997:9997"
